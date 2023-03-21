@@ -16,7 +16,7 @@ public class MainActivity extends AppCompatActivity implements StoriesProgressVi
     private StoriesProgressView storiesProgressView;
     private ImageView image;
 
-    private int counter = 0;
+    private static final int START_POSITION = 0;
     private final int[] resources = new int[]{
             R.drawable.sample1,
             R.drawable.sample2,
@@ -58,16 +58,15 @@ public class MainActivity extends AppCompatActivity implements StoriesProgressVi
 
         storiesProgressView = (StoriesProgressView) findViewById(R.id.stories);
         storiesProgressView.setStoriesCount(PROGRESS_COUNT);
-        storiesProgressView.setStoryDuration(3000L);
+        storiesProgressView.setStoryDuration(500L);
         // or
         // storiesProgressView.setStoriesCountWithDurations(durations);
         storiesProgressView.setStoriesListener(this);
 //        storiesProgressView.startStories();
-        counter = 2;
-        storiesProgressView.startStories(counter);
+        storiesProgressView.startStories(START_POSITION);
 
         image = (ImageView) findViewById(R.id.image);
-        image.setImageResource(resources[counter]);
+        image.setImageResource(resources[START_POSITION]);
 
         // bind reverse view
         View reverse = findViewById(R.id.reverse);
@@ -91,18 +90,21 @@ public class MainActivity extends AppCompatActivity implements StoriesProgressVi
     }
 
     @Override
-    public void onNext() {
-        image.setImageResource(resources[++counter]);
+    public void onNext(int current) {
+        image.setImageResource(resources[current]);
     }
 
     @Override
-    public void onPrev() {
-        if ((counter - 1) < 0) return;
-        image.setImageResource(resources[--counter]);
+    public void onPrev(int current) {
+
+        image.setImageResource(resources[current]);
     }
 
     @Override
-    public void onComplete() {
+    public boolean onComplete(int current) {
+        storiesProgressView.startStories(current);
+        image.setImageResource(resources[current]);
+        return false;
     }
 
     @Override

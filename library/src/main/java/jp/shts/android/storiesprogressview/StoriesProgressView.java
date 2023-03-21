@@ -4,8 +4,10 @@ import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.os.Build;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.LinearLayout;
@@ -34,11 +36,11 @@ public class StoriesProgressView extends LinearLayout {
     private boolean isReverseStart;
 
     public interface StoriesListener {
-        void onNext();
+        void onNext(int current);
 
-        void onPrev();
+        void onPrev(int current);
 
-        void onComplete();
+        boolean onComplete(int current);
     }
 
     public StoriesProgressView(Context context) {
@@ -174,26 +176,28 @@ public class StoriesProgressView extends LinearLayout {
             @Override
             public void onFinishProgress() {
                 if (isReverseStart) {
-                    if (storiesListener != null) storiesListener.onPrev();
-                    if (0 <= (current - 1)) {
-                        PausableProgressBar p = progressBars.get(current - 1);
-                        p.setMinWithoutCallback();
+                    int prev = current - 1;
+                    if (0 <= prev) {
+                        progressBars.get(prev).setMinWithoutCallback();
                         progressBars.get(--current).startProgress();
+                        if (storiesListener != null) storiesListener.onPrev(prev);
                     } else {
                         progressBars.get(current).startProgress();
                     }
                     isReverseStart = false;
-                    return;
-                }
-                int next = current + 1;
-                if (next <= (progressBars.size() - 1)) {
-                    if (storiesListener != null) storiesListener.onNext();
-                    progressBars.get(next).startProgress();
                 } else {
-                    isComplete = true;
-                    if (storiesListener != null) storiesListener.onComplete();
+                    int max = progressBars.size() - 1;
+                    int next = current + 1;
+                    if (next <= max) {
+                        if (storiesListener != null) storiesListener.onNext(next);
+                        progressBars.get(next).startProgress();
+                    } else {
+                        if (storiesListener != null) {
+                            isComplete = storiesListener.onComplete(0);
+                        }
+                    }
+                    isSkipStart = false;
                 }
-                isSkipStart = false;
             }
         };
     }
@@ -203,6 +207,9 @@ public class StoriesProgressView extends LinearLayout {
      */
     public void startStories() {
         progressBars.get(0).startProgress();
+        for (int i = 1; i < progressBars.size(); i++) {
+            progressBars.get(i).setMinWithoutCallback();
+        }
     }
 
     /**
@@ -211,6 +218,9 @@ public class StoriesProgressView extends LinearLayout {
     public void startStories(int from) {
         for (int i = 0; i < from; i++) {
             progressBars.get(i).setMaxWithoutCallback();
+        }
+        for (int i = from + 1; i < progressBars.size(); i++) {
+            progressBars.get(i).setMinWithoutCallback();
         }
         progressBars.get(from).startProgress();
     }

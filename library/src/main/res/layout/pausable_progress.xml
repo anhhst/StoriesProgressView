@@ -22,6 +22,6 @@
         android:id="@+id/max_progress"
         android:layout_width="match_parent"
         android:layout_height="@dimen/progress_bar_height"
-        android:background="#fff"
+        android:background="@color/white"
         android:visibility="gone" />
 </FrameLayout>
