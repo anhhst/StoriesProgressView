@@ -1,11 +1,18 @@
 package jp.shts.android.storyprogressbar;
 
 import android.os.Bundle;
+
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.viewpager2.widget.ViewPager2;
+
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
-import android.widget.ImageView;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import jp.shts.android.storiesprogressview.StoriesProgressView;
 
@@ -14,17 +21,9 @@ public class MainActivity extends AppCompatActivity implements StoriesProgressVi
     private static final int PROGRESS_COUNT = 6;
 
     private StoriesProgressView storiesProgressView;
-    private ImageView image;
+    private ViewPager2 viewPager;
 
     private static final int START_POSITION = 0;
-    private final int[] resources = new int[]{
-            R.drawable.sample1,
-            R.drawable.sample2,
-            R.drawable.sample3,
-            R.drawable.sample4,
-            R.drawable.sample5,
-            R.drawable.sample6,
-    };
 
     private final long[] durations = new long[]{
             500L, 1000L, 1500L, 4000L, 5000L, 1000,
@@ -58,52 +57,51 @@ public class MainActivity extends AppCompatActivity implements StoriesProgressVi
 
         storiesProgressView = (StoriesProgressView) findViewById(R.id.stories);
         storiesProgressView.setStoriesCount(PROGRESS_COUNT);
-        storiesProgressView.setStoryDuration(500L);
+        storiesProgressView.setStoryDuration(2000L);
         // or
         // storiesProgressView.setStoriesCountWithDurations(durations);
         storiesProgressView.setStoriesListener(this);
 //        storiesProgressView.startStories();
         storiesProgressView.startStories(START_POSITION);
+        initRecyclerView();
 
-        image = (ImageView) findViewById(R.id.image);
-        image.setImageResource(resources[START_POSITION]);
+    }
 
-        // bind reverse view
-        View reverse = findViewById(R.id.reverse);
-        reverse.setOnClickListener(new View.OnClickListener() {
+    private void initRecyclerView() {
+        viewPager = (ViewPager2) findViewById(R.id.recycler_view);
+
+        ImageAdapter adapter = new ImageAdapter();
+        final List<Integer> resources = new ArrayList<Integer>();
+        resources.add(R.drawable.sample1);
+        resources.add(R.drawable.sample2);
+        resources.add(R.drawable.sample3);
+        resources.add(R.drawable.sample4);
+        resources.add(R.drawable.sample5);
+        resources.add(R.drawable.sample6);
+        adapter.setList(resources);
+        viewPager.setAdapter(adapter);
+        viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
             @Override
-            public void onClick(View v) {
-                storiesProgressView.reverse();
+            public void onPageSelected(int position) {
+                storiesProgressView.startStories(position);
             }
         });
-        reverse.setOnTouchListener(onTouchListener);
-
-        // bind skip view
-        View skip = findViewById(R.id.skip);
-        skip.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                storiesProgressView.skip();
-            }
-        });
-        skip.setOnTouchListener(onTouchListener);
     }
 
     @Override
     public void onNext(int current) {
-        image.setImageResource(resources[current]);
+        viewPager.setCurrentItem(current, true);
     }
 
     @Override
     public void onPrev(int current) {
-
-        image.setImageResource(resources[current]);
+        viewPager.setCurrentItem(current, true);
     }
 
     @Override
     public boolean onComplete(int current) {
+        viewPager.setCurrentItem(current, true);
         storiesProgressView.startStories(current);
-        image.setImageResource(resources[current]);
         return false;
     }
 
