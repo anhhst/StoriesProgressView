@@ -125,7 +125,7 @@ public class StoriesProgressView extends LinearLayout {
         if (current < 0) return;
         PausableProgressBar p = progressBars.get(current);
         isSkipStart = true;
-        p.setMax();
+        p.setMin();
     }
 
     /**
@@ -175,6 +175,7 @@ public class StoriesProgressView extends LinearLayout {
 
             @Override
             public void onFinishProgress() {
+                int max = progressBars.size() - 1;
                 if (isReverseStart) {
                     int prev = current - 1;
                     if (0 <= prev) {
@@ -182,12 +183,13 @@ public class StoriesProgressView extends LinearLayout {
                         progressBars.get(--current).startProgress();
                         if (storiesListener != null) storiesListener.onPrev(prev);
                     } else {
-                        progressBars.get(current).startProgress();
+                        progressBars.get(max).setMinWithoutCallback();
+                        progressBars.get(max).startProgress();
                     }
                     isReverseStart = false;
                 } else {
-                    int max = progressBars.size() - 1;
                     int next = current + 1;
+                    progressBars.get(current).setMaxWithoutCallback();
                     if (next <= max) {
                         if (storiesListener != null) storiesListener.onNext(next);
                         progressBars.get(next).startProgress();
@@ -216,10 +218,7 @@ public class StoriesProgressView extends LinearLayout {
      * Start progress animation from specific progress
      */
     public void startStories(int from) {
-        for (int i = 0; i < from; i++) {
-            progressBars.get(i).setMaxWithoutCallback();
-        }
-        for (int i = from + 1; i < progressBars.size(); i++) {
+        for (int i = 0; i < progressBars.size(); i++) {
             progressBars.get(i).setMinWithoutCallback();
         }
         progressBars.get(from).startProgress();

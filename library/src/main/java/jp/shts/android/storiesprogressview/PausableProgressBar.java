@@ -21,7 +21,6 @@ final class PausableProgressBar extends FrameLayout {
     private static final int DEFAULT_PROGRESS_DURATION = 2000;
 
     private View frontProgressView;
-    private View maxProgressView;
 
     private PausableScaleAnimation animation;
     private long duration = DEFAULT_PROGRESS_DURATION;
@@ -44,7 +43,6 @@ final class PausableProgressBar extends FrameLayout {
         super(context, attrs, defStyleAttr);
         LayoutInflater.from(context).inflate(R.layout.pausable_progress, this);
         frontProgressView = findViewById(R.id.front_progress);
-        maxProgressView = findViewById(R.id.max_progress); // work around
     }
 
     public void setDuration(long duration) {
@@ -65,7 +63,6 @@ final class PausableProgressBar extends FrameLayout {
 
     void setMinWithoutCallback() {
         frontProgressView.setVisibility(INVISIBLE);
-        maxProgressView.setVisibility(GONE);
         if (animation != null) {
             animation.setAnimationListener(null);
             animation.cancel();
@@ -74,7 +71,6 @@ final class PausableProgressBar extends FrameLayout {
 
     void setMaxWithoutCallback() {
         frontProgressView.setVisibility(VISIBLE);
-        maxProgressView.setVisibility(VISIBLE);
         if (animation != null) {
             animation.setAnimationListener(null);
             animation.cancel();
@@ -83,7 +79,6 @@ final class PausableProgressBar extends FrameLayout {
 
     private void finishProgress(boolean isMax) {
         frontProgressView.setVisibility(isMax ? VISIBLE : INVISIBLE);
-        maxProgressView.setVisibility(isMax ? VISIBLE : GONE);
         if (animation != null) {
             animation.setAnimationListener(null);
             animation.cancel();
@@ -94,7 +89,6 @@ final class PausableProgressBar extends FrameLayout {
     }
 
     public void startProgress() {
-        maxProgressView.setVisibility(GONE);
 
         animation = new PausableScaleAnimation(0, 1, 1, 1, Animation.ABSOLUTE, 0, Animation.RELATIVE_TO_SELF, 0);
         animation.setDuration(duration);
